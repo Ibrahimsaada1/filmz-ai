@@ -39,11 +39,16 @@ def transform_interactions_data(interactions: list[dict]) -> list[dict]:
     """
     Transform the interactions data to meet AWS personalize interactions schema before loaded into the data warehouse
     """
+    print("interactions", len(interactions))
     for interaction in interactions:
+        # Drop interaction with missing values
+        if not interaction["userId"] or not interaction["itemId"] or not interaction["createdAt"]:
+            continue
+
         interaction["USER_ID"] = interaction.pop("userId")
         interaction["ITEM_ID"] = interaction.pop("itemId")
         # Convert eg. 2025-03-31 00:21:03.762000 to timestamp
-        interaction["TIMESTAMP"] = int(datetime.strptime(str(interaction.pop("createdAt")), "%Y-%m-%d %H:%M:%S.%f").timestamp())
+        interaction["TIMESTAMP"] = int(datetime.strptime(str(interaction.pop("createdAt")).split(" ")[0], "%Y-%m-%d").timestamp())
     return interactions
 
 def transform_data(
