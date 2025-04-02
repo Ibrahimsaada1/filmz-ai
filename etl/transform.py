@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 from datetime import datetime
+import random
+import time
 
 def transform_items_data(items: list[dict]) -> list[dict]:
     """
@@ -33,13 +35,26 @@ def transform_users_data(users: list[dict]) -> list[dict]:
         user["AGE"] = int(user.pop("id"))
         user["FIRST_NAME"] = user.pop("firstname")
         user["LAST_NAME"] = user.pop("lastname")
-    return users
+    return 
+
+def generate_interaction_data(num_interactions=1000):
+    interactions = []
+    current_time = int(time.time())
+
+    for _ in range(num_interactions):
+        interaction = {
+            'USER_ID': random.randint(1, 25),
+            'ITEM_ID': random.randint(1, 2000),
+            'TIMESTAMP': current_time - random.randint(0, 31536000)  # up to one year ago
+        }
+        interactions.append(interaction)
+
+    return interactions
 
 def transform_interactions_data(interactions: list[dict]) -> list[dict]:
     """
     Transform the interactions data to meet AWS personalize interactions schema before loaded into the data warehouse
     """
-    print("interactions", len(interactions))
     for interaction in interactions:
         # Drop interaction with missing values
         if not interaction["userId"] or not interaction["itemId"] or not interaction["createdAt"]:
@@ -49,6 +64,10 @@ def transform_interactions_data(interactions: list[dict]) -> list[dict]:
         interaction["ITEM_ID"] = interaction.pop("itemId")
         # Convert eg. 2025-03-31 00:21:03.762000 to timestamp
         interaction["TIMESTAMP"] = int(datetime.strptime(str(interaction.pop("createdAt")).split(" ")[0], "%Y-%m-%d").timestamp())
+    
+    fake_interactions = generate_interaction_data(2000)
+    interactions.extend(fake_interactions)
+    print("interactions", len(interactions))
     return interactions
 
 def transform_data(

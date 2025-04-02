@@ -1,6 +1,6 @@
 import boto3
 import time
-import uuid
+import nanoid
 
 BUCKET_NAME = "filmz-ml-data"
 
@@ -20,7 +20,7 @@ def cresate_users_dataset_impot_job(account_id: str, region: str):
             "dataLocation": f"s3://{BUCKET_NAME}/users.csv"
         },
         roleArn=roleArn,
-        jobName=f"filmz-users-import-job-{uuid.uuid4()}"
+        jobName=f"filmz-users-import-job-{nanoid.generate(size=10)}"
     )
 
     while True:
@@ -51,7 +51,7 @@ def create_items_dataset_impot_job(account_id: str, region: str):
             "dataLocation": f"s3://{BUCKET_NAME}/items.csv"
         },
         roleArn=roleArn,
-        jobName=f"filmz-items-import-job-{uuid.uuid4()}"
+        jobName=f"filmz-items-import-job-{nanoid.generate(size=10)}"
     )
 
     while True:
@@ -82,7 +82,7 @@ def create_interactions_dataset_impot_job(account_id: str, region: str):
             "dataLocation": f"s3://{BUCKET_NAME}/interactions.csv"
         },
         roleArn=roleArn,
-        jobName= f"filmz-interactions-import-job-{uuid.uuid4()}"
+        jobName= f"filmz-interactions-import-job-{nanoid.generate(size=10)}"
     )
 
     while True:
@@ -104,7 +104,7 @@ def setup_personalize(account_id: str, region: str):
     create_items_dataset_impot_job(account_id, region)
     create_interactions_dataset_impot_job(account_id, region)
 
-    solution_name = "filmz-recommendation-solution"
+    solution_name = "filmz-recommendation-solution-2"
 
     personalize = boto3.client("personalize")
 
@@ -113,7 +113,7 @@ def setup_personalize(account_id: str, region: str):
 
     # Create a solution version
     response = personalize.create_solution_version(
-        solutionArn=solution_arn
+        solutionArn=solution_arn,
     )
 
     # Wait for the solution version to be active
